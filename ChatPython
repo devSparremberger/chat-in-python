@@ -1,0 +1,149 @@
+import os
+from datetime import date
+import time
+
+#1- Criar um chat
+#2- Salvar arquivo
+#3- Ler arquivo
+#4- Sair do chat
+mensagens = []
+
+nome = input("digite seu nome: ")
+def loginCadasto():
+    print("Olá estámos a executar o programa, só um momento.")
+    time.sleep(2)
+    print("Selecione a opção:")
+    print("1.Cadastro:")
+    print("2.Login")
+    aba =  input("Comando:")
+    if aba == '2':
+        print("Um momento...")
+        time.sleep(0.5)
+        Login()
+    else:
+        print("Um momento...")
+        time.sleep(0.5)
+        Cadastrar()
+
+def Cadastrar():
+    print("Realizar cadastro:")
+    print("____________________")
+    usuario = input("Nome:")
+    senha = input("Senha:")
+    nomeCompleto = input("Nome Completo:")
+    email = input("Email:")
+    print("Um momento...")
+    time.sleep(0.5)
+    print("Cadastrado com sucesso.")
+    os.system('cls')
+    menu()
+    
+def Login():
+    print("Realizar login:")
+    print("____________________")
+    usuario = input("Nome:")
+    senha = input("Senha:")
+    print("Um momento...")
+    time.sleep(1)
+    print("Logado com sucesso.")
+    time.sleep(0.5)
+    os.system('cls')
+    menu()
+
+
+def Criar():
+    while True:
+        os.system('cls')
+
+        if len(mensagens) > 0:
+            for m in mensagens:
+                print(m['nome'], '-', m['texto'])
+
+        print("____________________________________")
+
+        texto = input("mensagem (ou 'menu' para voltar ao menu principal): ")
+        if texto.lower() == 'menu':
+            menu()
+
+        mensagens.append({
+            'nome': nome,
+            'texto': texto
+        })
+
+def Salvar():
+    nome_pasta = "Python/Textos/"
+    nome_arquivo = input("Digite o nome do arquivo para salvar: ")
+    caminho_completo = os.path.join(nome_pasta, nome_arquivo + ".txt")
+    with open(caminho_completo, "w") as arquivo:
+        for mensagem in mensagens:
+            arquivo.write(f"{mensagem['nome']}: {mensagem['texto']}\n")
+    print("Chat salvo com sucesso!")
+    time.sleep(1)
+    os.system('cls')
+
+def listar_arquivos(nome_pasta):
+    try:
+        arquivos_na_pasta = os.listdir(nome_pasta)
+        arquivos_txt = [arquivo for arquivo in arquivos_na_pasta if arquivo.endswith(".txt")]
+        return arquivos_txt
+    except FileNotFoundError:
+        print("Pasta não encontrada.")
+        return []
+
+def mostrar_arquivos(arquivos):
+    print("Arquivos disponíveis para leitura:")
+    for i, arquivo in enumerate(arquivos, start=1):
+        print(f"{i}. {arquivo}")
+
+def Ler():
+    nome_pasta = "Python/Textos" 
+    arquivos = listar_arquivos(nome_pasta)
+    if arquivos:
+        mostrar_arquivos(arquivos)
+        escolha = input("Digite o número do arquivo que deseja ler: ")
+        try:
+            indice_arquivo = int(escolha) - 1
+            if 0 <= indice_arquivo < len(arquivos):
+                caminho_completo = os.path.join(nome_pasta, arquivos[indice_arquivo])
+                with open(caminho_completo, "r") as arquivo:
+                    conteudo = arquivo.read()
+                    print(f"Conteúdo do arquivo {arquivos[indice_arquivo]}:")
+                    print(conteudo)
+            else:
+                print("Escolha inválida.")
+        except ValueError:
+            print("Entrada inválida.")
+    time.sleep(1)
+
+def Sair():
+    print("Saindo do chat...")
+    time.sleep(1)
+    exit()
+
+def menu():
+    print("Bem vindo,", nome)
+    print("____________________")
+    print("1.Criar novo chat:")
+    print("2.Salvar chat:")
+    print("3.Ler chat:")
+    print("4.Sair:")
+    print("____________________")
+    Comando = int(input("Comando:"))
+    if Comando == 1:
+        os.system('cls')
+        Criar()
+    elif Comando == 2:
+        os.system('cls')
+        Salvar()
+    elif Comando == 3:
+        os.system('cls')
+        Ler()
+    elif Comando == 4:
+        os.system('cls')
+        Sair()
+    else:
+        print("Comando invalido")
+        os.system('cls')
+        menu()
+
+loginCadasto()
