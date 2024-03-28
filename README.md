@@ -31,4 +31,4 @@ Se você quiser contribuir para este projeto, sinta-se à vontade para fazer um 
 
 ## Autor
 
-Este projeto foi desenvolvido por [Seu Nome] e está disponível sob a [Licença](LICENSE).
+Este projeto foi desenvolvido por Samuel Sparremberger da Costa
