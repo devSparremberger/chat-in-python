@@ -1,14 +1,23 @@
 import os
 from datetime import date
 import time
+import customtkinter as ctk
+from tkinter import *
+import hashlib
+import getpass
+import psycopg2
 
-#1- Criar um chat
-#2- Salvar arquivo
-#3- Ler arquivo
-#4- Sair do chat
+conn = psycopg2.connect(
+    dbname="pythonchat",
+    user="postgres",
+    password="410203",
+    host="localhost"
+)
+cursor = conn.cursor()
+
+
 mensagens = []
 
-nome = input("digite seu nome: ")
 def loginCadasto():
     print("Olá estámos a executar o programa, só um momento.")
     time.sleep(2)
@@ -19,58 +28,89 @@ def loginCadasto():
     if aba == '2':
         print("Um momento...")
         time.sleep(0.5)
-        Login()
+        login()
     else:
         print("Um momento...")
         time.sleep(0.5)
-        Cadastrar()
+        cadastrar()
 
-def Cadastrar():
+def criar_hash(senha):
+    return hashlib.sha256(senha.encode()).hexdigest()
+
+def cadastrar():
     print("Realizar cadastro:")
     print("____________________")
-    usuario = input("Nome:")
-    senha = input("Senha:")
+    usuario = input("usuario:")
+    cursor.execute("SELECT * FROM usuarios WHERE usuario = %s", (usuario,))
+    if cursor.fetchone():
+        print("Usuario ja existe, por favor tente outro.")
+        return
+    
+    senha = getpass.getpass("Senha:")
+    senha_hash = criar_hash(senha)
+    confirmar_senha = getpass.getpass("Confirme a senha:")
+
     nomeCompleto = input("Nome Completo:")
     email = input("Email:")
+    cursor.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
+    if cursor.fetchone():
+        print("Email ja existe, por favor tente outro.")
+        return
+    
+    cursor.execute("insert into usuarios (usuario, senha, nomeCompleto, email) values (%s, %s, %s, %s)", (usuario, senha_hash, nomeCompleto, email))
+    conn.commit()
     print("Um momento...")
     time.sleep(0.5)
     print("Cadastrado com sucesso.")
     os.system('cls')
-    menu()
+    menu(usuario)
     
-def Login():
+def login():
     print("Realizar login:")
     print("____________________")
     usuario = input("Nome:")
-    senha = input("Senha:")
+    senha = getpass.getpass("Senha:")
+
+    senha_hash = criar_hash(senha)
+
     print("Um momento...")
     time.sleep(1)
-    print("Logado com sucesso.")
-    time.sleep(0.5)
-    os.system('cls')
-    menu()
+    
+    cursor.execute("SELECT * FROM usuarios WHERE usuario = %s AND senha = %s", (usuario, senha_hash))
+    if cursor.fetchone():
+        print("Logado com sucesso.")
+        time.sleep(0.5)
+        os.system('cls')
+    else:
+        print("Usuário ou senha inválidos.")
+        time.sleep(1)
+        os.system('cls')
+        login()
 
+    menu(usuario)
 
-def Criar():
+def exibir_mensagens():
+    if len(mensagens) > 0:
+        for m in mensagens:
+            print(m['nome'], '-', m['texto'])
+
+def criar(nome):
     while True:
         os.system('cls')
-
-        if len(mensagens) > 0:
-            for m in mensagens:
-                print(m['nome'], '-', m['texto'])
+        exibir_mensagens()
 
         print("____________________________________")
 
         texto = input("mensagem (ou 'menu' para voltar ao menu principal): ")
         if texto.lower() == 'menu':
-            menu()
+            menu(nome)
 
         mensagens.append({
             'nome': nome,
             'texto': texto
         })
 
-def Salvar():
+def salvar():
     nome_pasta = "Python/Textos/"
     nome_arquivo = input("Digite o nome do arquivo para salvar: ")
     caminho_completo = os.path.join(nome_pasta, nome_arquivo + ".txt")
@@ -95,7 +135,7 @@ def mostrar_arquivos(arquivos):
     for i, arquivo in enumerate(arquivos, start=1):
         print(f"{i}. {arquivo}")
 
-def Ler():
+def ler():
     nome_pasta = "Python/Textos" 
     arquivos = listar_arquivos(nome_pasta)
     if arquivos:
@@ -113,14 +153,13 @@ def Ler():
                 print("Escolha inválida.")
         except ValueError:
             print("Entrada inválida.")
-    time.sleep(1)
 
-def Sair():
+def sair():
     print("Saindo do chat...")
     time.sleep(1)
     exit()
 
-def menu():
+def menu(nome):
     print("Bem vindo,", nome)
     print("____________________")
     print("1.Criar novo chat:")
@@ -131,19 +170,20 @@ def menu():
     Comando = int(input("Comando:"))
     if Comando == 1:
         os.system('cls')
-        Criar()
+        criar(nome)
     elif Comando == 2:
         os.system('cls')
-        Salvar()
+        salvar()
     elif Comando == 3:
         os.system('cls')
-        Ler()
+        ler()
     elif Comando == 4:
         os.system('cls')
-        Sair()
+        sair()
     else:
         print("Comando invalido")
         os.system('cls')
-        menu()
+        menu(nome)
 
 loginCadasto()
+
